@@ -245,7 +245,7 @@ public class Game {
                 int rolarDado10 = random.nextInt(10) + 1;
 
                 System.out.println("Você rola o dado de 10 lados e tira: " + rolarDado10);
-                if (rolarDado10 <= 7) {
+                if (rolarDado10 < 7) {
                     System.out.println("\nVocê não conseguiu encontrar o item.");
                     continue;
                 }
