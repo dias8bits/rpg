@@ -54,11 +54,11 @@ public class Player {
         return stamina;
     }
 
-    public int getgetMaxStamina() {
+    public int getMaxStamina() {
         return maxStamina;
     }
 
     public List<Item> getInventario() {
         return inventario;
-    }
+    } 
 }
