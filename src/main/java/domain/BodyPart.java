@@ -2,23 +2,37 @@ package domain;
 
 public class BodyPart {
 
-    private String name;
-    private String description;
-    private int fallChance;
-    private int staminaCost;
+    private String nome;
+    private String descricao;
+    private int chanceDeCair;
+    private int custoDeStamina;
     private Item item;
 
-    public BodyPart(String name, String description, int fallChance, int staminaCost, Item item) {
-        this.name = name;
-        this.description = description;
-        this.fallChance = fallChance;
-        this.staminaCost = staminaCost;
+    public BodyPart(String nome, String descricao, int chanceDeCair, int custoDeStamina, Item item) {
+        this.nome = nome;
+        this.descricao = descricao;
+        this.chanceDeCair = chanceDeCair;
+        this.custoDeStamina = custoDeStamina;
         this.item = item;
     }
 
-    public String getName() { return name; }
-    public String getDescription() { return description; }
-    public int getFallChance() { return fallChance; }
-    public int getStaminaCost() { return staminaCost; }
-    public Item getItem() { return item; }
+    public String getNome() {
+        return nome;
+    }
+
+    public String getDescricao() {
+        return descricao;
+    }
+
+    public int getChanceDeCair() {
+        return chanceDeCair;
+    }
+
+    public int getCustoDeStamina() {
+        return custoDeStamina;
+    }
+
+    public Item getItem(){
+        return item;
+    }
 }

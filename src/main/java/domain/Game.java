@@ -6,156 +6,326 @@ import java.util.Random;
 import java.util.Scanner;
 
 public class Game {
-
     Scanner scanner = new Scanner(System.in);
     Random random = new Random();
     Player player;
+    boolean modoFacil;
 
-    List<BodyPart> bodyParts;
-    int colossusHp;
+    Colosso colosso;
 
-    public void start() {
+    public void start(){
 
-        System.out.println("-- COLOSSO --");
-        System.out.print("Nome: ");
+        int progressoAtual = 1;
+        
+        System.out.println("\n========================================");
+        System.out.println("       A LENDA DOS COLOSSOS");
+        System.out.println("========================================");
+        System.out.println("Bem-vindo! Derrote todos os colossos e salve sua amada.");
+        modoFacil = escolherModo();
+        System.out.print("Digite o nome do seu personagem: ");
 
-        player = new Player(scanner.nextLine());
+        player = new Player(verificadorDeNome());
+        while (progressoAtual <= 3) {
+            fasesColossos(progressoAtual);
+            
+            System.out.println("\n----------------------------------------");
+            System.out.println("Um " + colosso.getNome() + " surge a sua frente!");
+            System.out.println("O ponto fraco fica na cabeça. Cuidado com a sua stamina.");
+            
+            
+            List<BodyPart> partes = colosso.getPartesDoCorpo();
+            
+            for(int i = 0; i < partes.size() - 1; i++) {
+            boolean conseguirSubir = subirColosso(partes.get(i));
 
-        setupColossus();
+            if (!conseguirSubir) {
+                    gameOver();
+                    return;
+            }
 
-        System.out.println("\num colosso de pedra se ergue à sua frente");
-        System.out.println("o ponto fraco fica na cabeça. Cuidado com a stamina");
+        }
 
-        for (int i = 0; i < bodyParts.size() - 1; i++) {
-
-            boolean survived = part(bodyParts.get(i));
-
-            if (!survived) {
+            if (!AtqFinal(partes.get(partes.size() - 1))) {
                 gameOver();
                 return;
             }
+            progressoAtual++;
         }
 
-        finalAttack(bodyParts.get(bodyParts.size() - 1));
+        finalizarJogo();
     }
 
-    private void setupColossus() {
-
-        bodyParts = new ArrayList<>();
-
-        bodyParts.add(new BodyPart("pé", "a base do colosso, coberta de musgo", 5, 15,
-                new Item("adaga enferrujada", 3)));
-
-        bodyParts.add(new BodyPart("perna", "pedra rachada, dá pra se firmar nas fendas", 10, 20,
-                new Item("espada de pedra", 5)));
-
-        bodyParts.add(new BodyPart("torso", "o peito do colosso sobe e desce devagar", 15, 20,
-                new Item("elmo antigo", 4)));
-
-        bodyParts.add(new BodyPart("ombro", "vento forte aqui em cima", 20, 20,
-                new Item("lâmina sagrada", 10)));
-
-        bodyParts.add(new BodyPart("Cabeça", "o ponto fraco do colosso", 0, 0, null));
-
-        colossusHp = 25;
-    }
-
-    private boolean part(BodyPart part) {
-
-        boolean collected = false;
-        boolean rested = false;
-
-        System.out.println("\n-- " + part.getName() + " --");
-        System.out.println(part.getDescription());
-
+    private boolean escolherModo() {
         while (true) {
+            System.out.println("\n----------------------------------------");
+            System.out.println("           MODO DE JOGO");
+            System.out.println("----------------------------------------");
+            System.out.println("  1 - Fácil: você sempre vence os colossos");
+            System.out.println("  2 - Normal: o resultado depende dos dados");
+            System.out.print("\nEscolha uma opção: ");
 
-            System.out.println("\nstamina: " + player.getStamina() + "/" + player.getMaxStamina());
-            System.out.println("\n1 - subir para a proxima parte");
+            try {
+                int opcao = Integer.parseInt(scanner.nextLine());
 
-            if (part.getItem() != null && !collected) {
-                System.out.println("2 - procurar item");
+                if (opcao == 1) {
+                    System.out.println("Modo fácil selecionado.");
+                    return true;
+                }
+
+                if (opcao == 2) {
+                    System.out.println("Modo normal selecionado.");
+                    return false;
+                }
+            } catch (NumberFormatException e) {
             }
 
-            if (!rested) {
-                System.out.println("3 - Descansar (+20 stamina)");
+            System.out.println("Opção inválida. Digite 1 ou 2.");
+        }
+    }
+
+    private String verificadorDeNome() {
+        while (true) {
+            String nome = scanner.nextLine().trim();
+
+            if (!nome.isEmpty()) {
+                return nome;
             }
 
-            System.out.print("\nescolha: ");
+            System.out.println("O nome não pode ficar vazio.");
+            System.out.print("Digite o nome do seu personagem: ");
+        }
+    }
 
-            int option = scanner.nextInt();
+    private void finalizarJogo() {
+        int rolagemFinal = random.nextInt(100) + 1;
 
-            if (option == 1) {
+        System.out.println("\n========================================");
+        System.out.println("       TODOS OS COLOSSOS DERROTADOS");
+        System.out.println("========================================");
+        System.out.println("Dado do destino: " + rolagemFinal);
 
-                if (player.getStamina() < part.getStaminaCost()) {
-                    System.out.println("\nstamina insuficiente pra subir. descanse primeiro.");
+        if (rolagemFinal <= 33) {
+            System.out.println("\n*** FINAL 1: Você tenta salvar sua amada, porém não consegue ***");
+            System.out.println("Sua amada estava morta e não conseguiu acordar após a derrota dos colossos.");
+            System.out.println("Seu desejo de vê-la salva foi em vão, e você se torna um colosso.");
+        } else if (rolagemFinal <= 66) {
+            System.out.println("\n*** FINAL 2: Você consegue salvar sua amada, mas não sobrevive ***");
+            System.out.println("Ao ver que sua amada não acordava, você sente um imenso frio no fundo da alma.");
+            System.out.println("Quando sua vida se esvai, sua amada acorda e encontra você morto.");
+        } else {
+            System.out.println("\n*** FINAL 3: Você consegue salvar sua amada ***");
+            System.out.println("Você vê sua amada acordar, e os dois saem das masmorras.");
+            System.out.println("Juntos e felizes!");
+            System.out.println("FIM");
+        }
+    }
+    
+    private void fasesColossos(int fase){
+        switch(fase) {
+             case 1 ->               {
+                    List<BodyPart> parte = new ArrayList<>();
+                    parte.add(new BodyPart("pé", "a base do colosso, coberta de musgo", 5, 10,
+                            new Item(1,"adaga enferrujada", 3)));
+                    parte.add(new BodyPart("perna", "pedra rachada, dá pra se firmar nas fendas", 10, 20,
+                            new Item(2,"espada de pedra", 5)));
+                    parte.add(new BodyPart("torso", "o peito do colosso sobe e desce devagar", 15, 20,
+                            new Item(3, "elmo antigo", 4)));
+                    parte.add(new BodyPart("ombro", "vento forte aqui em cima", 20, 30,
+                            new Item(4, "lâmina sagrada", 10)));
+                        parte.add(new BodyPart("mão", "dedos de pedra se movem lentamente", 20, 25,
+                            new Item(2, "anel de escalada", 7)));
+                    parte.add(new BodyPart("Cabeça", "o ponto fraco do colosso", 0, 0, null));
+                    colosso = new Colosso("Gargântua de Pedra", 25, 1, parte);
+                }
+            case 2 ->                 {
+                    List<BodyPart> parte = new ArrayList<>();
+                    parte.add(new BodyPart("pé", "escamas escorregadias, segure firme!", 10, 25,
+                            new Item(1, "faca de osso", 4)));
+                    parte.add(new BodyPart("corpo", "penas gigantes voam ao seu redor", 15, 30,
+                            new Item(2, "amuleto dos ventos", 6)));
+                    parte.add(new BodyPart("asa", "o movimento das asas do pássaro é forte", 20, 40,
+                            new Item(3, "lança da tempestade", 12)));
+                        parte.add(new BodyPart("cauda", "as penas da cauda cortam o ar", 20, 35,
+                            new Item(1, "penas cortantes", 8)));
+                    parte.add(new BodyPart("pescoço", "o ponto fraco do pássaro", 0, 0,
+                    new Item(4, "lâminas tempestuosas", 15)));
+                    colosso = new Colosso("Pássaro da Tempestade", 40, 2, parte);
+                }
+            case 3 ->                 {
+                    List<BodyPart> parte = new ArrayList<>();
+                    parte.add(new BodyPart("barbatana inferior", "é escorregadia e a correnteza puxa forte", 15, 30, 
+                    new Item(1, "Garras vorazes", 7)));
+                    parte.add(new BodyPart("carapaça dorsal", "cracas afiadas machucam suas mãos", 15, 30, 
+                    new Item(2, "pérola do abismo", 13)));
+                    parte.add(new BodyPart("nuca", "o monstro se debate violentamente na água", 25, 50, 
+                    new Item(3, "arpão ancestral", 20)));
+                    parte.add(new BodyPart("barbatana dorsal", "a água gira com força ao redor das escamas", 20, 40,
+                    new Item(4, "tridente abissal", 18)));
+                    parte.add(new BodyPart("cauda", "a cauda do leviatã golpeia a correnteza", 25, 45,
+                    new Item(2, "escama protetora", 11)));
+                    parte.add(new BodyPart("escama reversa", "o ponto fraco do leviatã", 0, 0, null));
+                    colosso = new Colosso("Boss secreto: Leviatã das Profundezas", 50, 3, parte);
+                }
+            default -> {
+                System.out.printf("Fim de jogo");
+            }
+        }
+    }   
+    
+    private boolean subirColosso(BodyPart parte){
+        boolean ColetarItem = false;
+        boolean dormir = false;
+        int tentativaDormir = 0;
+
+        boolean itemDisponivel = parte.getItem() != null;
+
+        System.out.println("\n----------------------------------------");
+        System.out.println("          " + parte.getNome().toUpperCase());
+        System.out.println("----------------------------------------");
+        System.out.println(parte.getDescricao());
+
+        while (true) { 
+            System.out.println("Jogador: " + player.getNome());
+            System.out.println("Stamina: " + player.getStamina() + "/" + player.getgetMaxStamina());
+            System.out.println("\n  1 - Subir para a próxima parte"); 
+
+            if(itemDisponivel && !ColetarItem){
+                System.out.println("  2 - Procurar item");
+            }
+
+            if(!dormir && tentativaDormir <= 3 && player.getgetMaxStamina() == 100){
+                System.out.println("  3 - Descansar");
+            }
+
+            int opcao = 0;
+
+            while(true){
+                System.out.print("\nEscolha uma opção: ");
+
+                try{
+                    opcao = Integer.parseInt(scanner.nextLine());
+
+                    if(opcao >= 1 && opcao <= 3){
+                        break;
+                    } else {
+                        System.out.println("Opção inválida. Digite 1, 2 ou 3."); 
+                    }
+
+                }catch(NumberFormatException e){
+                    System.out.println("Entrada inválida. Digite apenas um número.");
+                }
+            }
+
+            if(opcao == 1){
+                if (modoFacil) {
+                    System.out.println("Você sobe com segurança no modo fácil!");
+                    return true;
+                }
+
+                if (player.getStamina() < parte.getCustoDeStamina()){
+                    System.out.println("\nStamina insuficiente para subir. Descanse primeiro.");                 
                     continue;
                 }
 
-                player.useStamina(part.getStaminaCost());
-
-                int roll = random.nextInt(100);
-
-                if (roll < part.getFallChance()) {
-                    System.out.println("\nvoce perde o equilíbrio e cai...");
+                player.usarStamina(parte.getCustoDeStamina());
+                
+                int rolarDado100 = random.nextInt(100) + 1;
+                System.out.println("Você rola o dado de 100 lados e tira: " + rolarDado100);
+                if(rolarDado100 < parte.getChanceDeCair()){
+                    System.out.println("\nVocê perde o equilíbrio e cai...");
                     return false;
                 }
 
-                System.out.println("\nvoce sobe com sucesso!");
+                System.out.println("Você sobe com sucesso!");
                 return true;
+            } else if(opcao == 2 && itemDisponivel && !ColetarItem){
+                int rolarDado10 = random.nextInt(10) + 1;
 
-            } else if (option == 2 && part.getItem() != null && !collected) {
+                System.out.println("Você rola o dado de 10 lados e tira: " + rolarDado10);
+                if (rolarDado10 == 1) {
+                    System.out.println("\nVocê não conseguiu encontrar o item.");
+                    continue;
+                }
 
-                player.addItem(part.getItem());
-                collected = true;
+                player.adicionarItem(parte.getItem());
+                ColetarItem = true;
+                System.out.println("\nVocê encontrou: " + parte.getItem().getNome()
+                    + " (+" + parte.getItem().getAtqBonus() + " de ataque).");
+            }else if (opcao == 3) {
+                int rolarDado10 = random.nextInt(10) + 1;
 
-                System.out.println("\nvoce encontrou: " + part.getItem().getName()
-                        + " ( +" + part.getItem().getAttackBonus() + " de ataque)");
-
-            } else if (option == 3) {
-
-                player.rest(20);
-                rested = true;
-                System.out.println("\nvoce descansa e recupera stamina");
-
-            } else {
-                System.out.println("\nopcao invalida");
+                System.out.println("Você rola o dado de 10 lados e tira: " + rolarDado10);
+                if (rolarDado10 == 1) {
+                    System.out.println("\nVocê não conseguiu descansar.");
+                    tentativaDormir = 4;
+                    continue;
+                }else if(rolarDado10 <= 5){
+                    System.out.println("Você tentou descansar, mas se assustou. Recuperou 5 de stamina.");
+                    player.restaurarStamina(5);
+                    tentativaDormir++;
+                }else{
+                    
+                    if(player.getStamina() <= 20){
+                        player.restaurarStamina(80);
+                    }else{
+                        player.restaurarStamina(20);
+                    }
+                    dormir = true;
+                    System.out.println("\nVocê descansou e recuperou stamina.");
+                    tentativaDormir = 0;
+                }
+            }else{
+                System.out.println("\nOpção inválida para esta parte.");
             }
 
-            if (player.getStamina() <= 0) {
-                System.out.println("\nsuas forcas acabam e você despenca...");
+            if (player.getStamina() <= 0){
+                System.out.println("\nSuas forças acabam e você despenca...");
                 return false;
             }
         }
     }
 
-    private void finalAttack(BodyPart head) {
+    private boolean AtqFinal(BodyPart cabeca){
 
-        System.out.println("\n-- " + head.getName() + " --");
-        System.out.println(head.getDescription());
-        System.out.println("\nvoce chegou ao ponto fraco");
-        System.out.println("eeu ataque total: " + player.getTotalAttack());
+        System.out.println("\n----------------------------------------");
+        System.out.println("          " + cabeca.getNome().toUpperCase());
+        System.out.println("----------------------------------------");
+        System.out.println(cabeca.getDescricao());
+        System.out.println("\nVocê chegou ao ponto fraco.");
+        System.out.println("Seu ataque total: " + player.getAtaqueTotal());
 
-        System.out.println("\n1 - atacar");
-        System.out.print("\nescolha: ");
+        while (true) {
+            System.out.println("\n  1 - Atacar");
 
-        scanner.nextInt();
-
-        int damage = player.getTotalAttack();
-
-        if (damage >= colossusHp) {
-            System.out.println("\no golpe atinge o ponto fraco. O colosso desaba");
-            System.out.println("\n*** VITORIA! ***");
-        } else {
-            System.out.println("\no golpe não foi forte o suficiente (precisava de " + colossusHp
-                    + ", causou " + damage + ")");
-            System.out.println("o colosso sacode e voce despenca");
-            System.out.println("\n*** DERROTA — procure armas mais fortes no corpo do colosso ***");
+            try {
+                int opcao = Integer.parseInt(scanner.nextLine());
+                if (opcao == 1) {
+                    break;
+                }
+                System.out.println("Opção inválida. Digite 1 para atacar.");
+            } catch (NumberFormatException e) {
+                System.out.println("Opção inválida. Digite 1 para atacar.");
+            }
         }
+
+        int dano = player.getAtaqueTotal();
+
+        if(modoFacil || dano >= colosso.getStamina()){
+            System.out.println("\nO golpe atinge o ponto fraco. O colosso desaba!");
+            System.out.println("\n*** VITÓRIA! ***");
+            return true;
+        }else {
+                System.out.println("O golpe não foi forte o suficiente (era necessário " + colosso.getStamina()
+                    + ", mas causou " + dano + ").");
+                System.out.println("O colosso sacode, e você despenca.");
+                System.out.println("\n*** DERROTA: procure armas mais fortes no corpo do colosso ***");
+            return false;
+        }
+
     }
 
     private void gameOver() {
-        System.out.println("\nvoce cai de uma grande altura...");
+        System.out.println("\nVocê cai de uma grande altura...");
         System.out.println("\n*** GAME OVER ***");
     }
 }

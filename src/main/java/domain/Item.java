@@ -2,14 +2,25 @@ package domain;
 
 public class Item {
 
-    private String name;
-    private int attackBonus;
+    private int raridade;
+    private String nome;
+    private int atqBonus;
 
-    public Item(String name, int attackBonus) {
-        this.name = name;
-        this.attackBonus = attackBonus;
+    public Item(int raridade, String nome, int atqBonus) {
+        this.raridade = raridade;
+        this.nome = nome;
+        this.atqBonus = atqBonus;
     }
 
-    public String getName() { return name; }
-    public int getAttackBonus() { return attackBonus; }
+    public String getNome() {
+        return nome;
+    }
+
+    public int getRaridade() {
+        return raridade;
+    }
+
+    public int getAtqBonus() {
+        return atqBonus;
+    }
 }
